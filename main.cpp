@@ -1,110 +1,78 @@
-/*
- Определить класс с именем TRAIN, содержащий следующие поля:
- ● название пункта назначения;
- ● номер поезда;
- ● время отправления.
- Определить методы доступа к этим полям и перегруженные операции извлечения и вставки для объектов типа TRAIN.
- Заранее число объектов не известно.
- Написать программу, выполняющую следующие действия:
- ● записи должны быть размещены в алфавитном порядке по названиям пунктов назначения;
- ● вывод на экран информации о поездах, направляющихся в пункт, название которого введено с клавиатуры;
- ● если таких поездов нет, выдать на дисплей соответствующее сообщение.
-*/
-
-
 #include <iostream>
-#include "mylist.h"
+#include <fstream>
+#include<string>
 
 using namespace std;
 
-void menuPrint()
+bool isDevider(string ch)
 {
-    cout << endl << "\tМеню" << endl;
-    cout << "0\tВыход" << endl;
-    cout << "1\tВывод" << endl;
-    cout << "2\tДобавить" << endl;
-    cout << "3\tРедактировать" << endl;
-    cout << "4\tУдалить" << endl;
-    cout << "5\tПоиск по пункту" << endl;
-    cout << "6\tСортировка" << endl;
+    return (ch == "." || ch == "!" || ch == "?" || ch == "\"");
 }
 
-void menu()
+bool isDeviderExt(string ch)
 {
-    myList obj;
+    return (ch == "." || ch == "!" || ch == "?" || ch == "\"" || ch == " " || ch == "\t" || ch == "\n");
+}
 
-    int take = 0;
-
-    while (1)
+bool check(string a) // проверка на наличие кавычек в строке
+{
+    if (a.find('<<') != string::npos)
     {
-        menuPrint();
-        obj.seeFlag();
+        return 0;
+    }
+    else return 1;
+}
 
-        mcin(&take);
-        switch (take)
-        {
-        case 0:
-            return;
+void readFile()
+{
+    setlocale(LC_ALL, "Russian");
 
-        case 1:
-            obj.print();
-            break;
+    ifstream fin; // создаем объект класса ifstream
+    string filename = "/Users/sofiakondrateva/Downloads/TP_2lr_2/TP_2lr_2/text.txt"; // объявляем название файла
 
-        case 2:
-            obj.add();
-            break;
-
-        case 3:
-            try {
-                obj.edit();
-            }
-            catch (int e)
-            {
-                if (e == -1)
-                    cout << "EXEPTION: invalid index" << endl;
-                if (e == 0)
-                    cout << "EXEPTION: no objects added yet" << endl;
-            }
-            break;
-
-        case 4:
-            try {
-                obj.del();
-            }
-            catch (int e)
-            {
-                if (e == -1)
-                    cout << "EXEPTION: invalid index" << endl;
-                if (e == 0)
-                    cout << "EXEPTION: no objects added yet" << endl;
-            }
-            break;
-
-        case 5:
-            try {
-                obj.findType();
-            }
-            catch (int e)
-            {
-                if (e == 0)
-                    cout << "EXEPTION: no objects added yet" << endl;
-            }
-            break;
-        case 6:
-            obj.flipFlag();
-            break;
-
-        default:
-            cout << "unknown" << endl;
-        }
+    fin.open(filename); // открываем файл
+    if (!fin.is_open()) // если файл не открылся, значит вызываем исключение, что файл не найден
+    {
+        throw "Исключение: файл " + filename + " не найден";
     }
 
+    string str[100];
+    string c;
+    char ch;
+    int count = 0;
 
+    while (!fin.eof()) // пока файл не пуст
+    {
+        fin.get(ch); // получаем строку (предложение до знака "." или "?" или "!")
+        c = ch;
+
+        if (!isDeviderExt(c)) // пока строка не равна конце предложения (то есть точки и т.д)
+        {
+            while (!fin.eof()) // пока файл не пуст
+            {
+                str[count] += c; // добавляем предложение
+                fin.get(ch);
+                c = ch;
+                if (isDevider(c)) // если это конец предложения
+                {
+                    if (check(str[count])) // проверка на запятую
+                    {
+                        cout << "" << endl;
+                    } else {
+                        cout << str[count] << endl; // выводим предложения в кавычках
+                    }
+                    
+                    count++;
+                    break;
+                }
+            }
+        }
+    }
+    fin.close();
 }
+
 
 int main()
 {
-    menu();
-
-    return 0;
+readFile();
 }
